@@ -2,9 +2,11 @@ package soundboard
 
 import (
 	"encoding/binary"
-	"errors"
-	"io"
+	"fmt"
 	"os"
+	"time"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // Sound commands mapped to sound file
@@ -13,23 +15,24 @@ var Commands = map[string]string{
 	"!bonglord": "assets/bonglord.dca",
 }
 
+// Sound struct that provides the name of the sound and a buffer
 type Sound struct {
 	Name   string
 	buffer [][]byte
 }
 
 // Given a fileName, return the Sound struct with loaded buffer for sound
-func loadSound(fileName string) (s *Sound, err error) {
+func LoadSound(fileName string) (s Sound, err error) {
+	// Instantiate a sound with a new buffer and name
+	newSound := Sound{
+		fileName,
+		make([][]byte, 0),
+	}
+
 	file, e := os.Open(fileName)
 	if e != nil {
 		fmt.Println("Error opening dca file:", e)
-		return nil, e
-	}
-
-	// Instantiate a sound with a new buffer and name
-	newSound := Sound{
-		command,
-		make([][]byte, 0),
+		return newSound, e
 	}
 
 	var opuslen int16
@@ -37,8 +40,8 @@ func loadSound(fileName string) (s *Sound, err error) {
 		// Get opus frame length from dca file
 		e = binary.Read(file, binary.LittleEndian, &opuslen)
 		if e != nil {
-			fmt.Println("Error reading from dca file:", e)
-			return nil, e
+			fmt.Println("Error reading opus frame length from dca file:", e)
+			return newSound, e
 		}
 
 		// Create a buffer and read PCM packets into it
@@ -46,16 +49,16 @@ func loadSound(fileName string) (s *Sound, err error) {
 		e = binary.Read(file, binary.LittleEndian, &InBuf)
 		if e != nil {
 			fmt.Println("Error reading from dca file:", e)
-			return nil, e
+			return newSound, e
 		}
 
 		// Append the sound to the buffer in newSound
-		newSound.buffer = append(newSound.buffer, InBuf...)
+		newSound.buffer = append(newSound.buffer, InBuf)
 	}
 	return newSound, nil
 }
 
-func playSound(s *discordgo.Session, guildID, channelID string, sound Sound) (err error) {
+func PlaySound(s *discordgo.Session, guildID, channelID string, sound Sound) (err error) {
 
 	vc, e := s.ChannelVoiceJoin(guildID, channelID, false, true)
 	if e != nil {

@@ -11,7 +11,7 @@ import (
 // Discord session handler for yascat soundboard
 func SoundboardHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// TODO(doria): Add logging
-	if _, ok := soundboard.Commands[m.Content]; ok {
+	if fileName, ok := soundboard.Commands[m.Content]; ok {
 		c, e := s.State.Channel(m.ChannelID)
 		if e != nil {
 			fmt.Println("Could not find channel:", e)
@@ -26,8 +26,8 @@ func SoundboardHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		for _, vs := range g.VoiceStates {
 			if vs.UserID == m.Author.ID {
-				sound, e := soundboard.loadSound(m.Content)
-				e := soundboard.playSound(s, g.ID, vs.ChannelID, sound)
+				sound, e := soundboard.LoadSound(fileName)
+				e = soundboard.PlaySound(s, g.ID, vs.ChannelID, sound)
 				if e != nil {
 					fmt.Println("Error playing sound", e)
 				}

@@ -9,7 +9,6 @@ import (
 
 	"yascat/bot"
 	"yascat/handlers"
-	//"yascat/soundboard"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func main() {
 	// }
 
 	// Add all bot handlers
-	dg.AddHandler(handlers.soundboard)
+	dg.AddHandler(handlers.SoundboardHandler)
 
 	// Open discord connection and run bot
 	e = dg.Open()
