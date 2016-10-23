@@ -1,4 +1,5 @@
 # Simple Bot for Discord - Yascat
+[![Build Status](https://travis-ci.org/doriable/discord-yascat.svg?branch=master)](https://travis-ci.org/doriable/discord-yascat)
 
 ## Introduction
 
