@@ -1,21 +1,15 @@
 language: go
 
-sudo: false
-
 go:
-  - 1.4
-  - 1.5
   - 1.6
   - 1.7
   - tip
 
 install:
-    - go get github.com/doriable/yascat
     - go get -v .
     - go get -v github.com/golang/lint/golint
 
 script:
-    - diff <(gofmt -d .) <(echo -n)
     - go vet -x ./...
     - golint ./...
     - go test -v ./...
