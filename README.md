@@ -7,6 +7,7 @@ I wanted to learn more Go and create a chatbot for our Discord server. This is a
 ## Commands
 
 `!yas` : yascat will respond with `yas`
+`!bonglord` : yascat will respond with `I'm the bonglord`
 
 ## WIP
 
