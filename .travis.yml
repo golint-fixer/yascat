@@ -9,5 +9,13 @@ go:
   - 1.7
   - tip
 
+install:
+    - go get github.com/doriable/yascat
+    - go get -v .
+    - go get -v github.com/golang/lint/golint
+
 script:
-  - go test -v ./...
+    - diff <(gofmt -d .) <(echo -n)
+    - go vet -x ./...
+    - golint ./...
+    - go test -v ./...
