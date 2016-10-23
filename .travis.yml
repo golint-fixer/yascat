@@ -5,6 +5,8 @@ go:
   - 1.7
   - tip
 
+go_import_path = github.com/doriable/yascat
+
 install:
     - go get -v .
     - go get -v github.com/golang/lint/golint
