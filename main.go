@@ -1,30 +1,18 @@
 package main
 
 import (
-	"encoding/binary"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	// "strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
+
+	"yascat/bot"
+	"yascat/handlers"
+	//"yascat/soundboard"
 )
 
-type Bot struct {
-	Token        string
-	Client_ID    string
-	Client_Token string
-	Username     string
-}
-
-var BotID string
-var buffer = make([][]byte, 0)
-
 func main() {
-
 	// Retrieve bot information from secrets
 	sfile, e := os.Open("secrets.json")
 	if e != nil {
@@ -38,33 +26,26 @@ func main() {
 		return
 	}
 
-	var bot Bot
-	json.Unmarshal(sdata, &bot)
+	// Create new bot
+	bot := bot.NewBot(sdata)
 
 	// Extract the token from the bot and create new discord session
-	var token string = bot.Token
+	token := bot.Token
 	dg, e := discordgo.New(token)
 	if e != nil {
-		fmt.Println("Error creating Discord session, e")
-		return
-}
-
-	u, e := dg.User("@me")
-	if e != nil {
-		fmt.Println("Error obtaining account details,", e)
-	}
-
-	BotID = u.ID
-
-	err := loadSound()
-	if err != nil {
-		fmt.Println("Error loading sound:", err)
+		fmt.Println("Error creating Discord session", e)
 		return
 	}
 
+	// TODO(doria): Add logging here
+	// Extract the account details for bot
+	// u, e := dg.User("@me")
+	// if e != nil {
+	// fmt.Println("Error obtaining account details,", e)
+	// }
 
-	// Handlers
-	dg.AddHandler(yasSay)
+	// Add all bot handlers
+	dg.AddHandler(handlers.soundboard)
 
 	// Open discord connection and run bot
 	e = dg.Open()
@@ -75,100 +56,6 @@ func main() {
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 	<-make(chan struct{})
+	// TODO(doria): Add logging here
 	return
-}
-
-
-func loadSound() error {
-	file, e := os.Open("yascat.dca")
-
-	if e != nil {
-		fmt.Println("Error opening dca file:", e)
-		return e
-	}
-
-	var opuslen int16
-
-	for {
-		// Get opus frame lenght from dca file
-		e = binary.Read(file, binary.LittleEndian, &opuslen)
-
-		if e == io.EOF || e == io.ErrUnexpectedEOF {
-			return nil
-		}
-
-		if e != nil {
-			fmt.Println("Error reading from dca file:", e)
-			return e
-		}
-
-		InBuf := make([]byte, opuslen)
-		e = binary.Read(file, binary.LittleEndian, &InBuf)
-
-		if e != nil {
-			fmt.Println("Error reading from dca file:", e)
-			return e
-		}
-
-		buffer = append(buffer, InBuf)
-	}
-}
-
-
-func playSound(s *discordgo.Session, guildID, channelID string) (err error) {
-
-	vc, e := s.ChannelVoiceJoin(guildID, channelID, false, true)
-		if e != nil {
-			return
-		}
-
-		_ = vc.Speaking(true)
-
-		for _, buff := range buffer {
-			vc.OpusSend <- buff
-		}
-
-		_ = vc.Speaking(false)
-
-		time.Sleep(30 * time.Millisecond)
-
-		_ = vc.Disconnect()
-
-		return
-}
-
-
-// Message event handle
-func yasSay(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	if m.Author.ID == BotID {
-		return
-	}
-
-	if m.Content == "!yas" {
-		// _, _ = s.ChannelMessageSend(m.ChannelID, "yas")
-		c, e := s.State.Channel(m.ChannelID)
-		if e != nil {
-			fmt.Println("Could not find channel:", e)
-			return
-		}
-
-
-		g, e := s.State.Guild(c.GuildID)
-		if e != nil {
-			fmt.Println("Could not find guild", e)
-			return
-		}
-
-
-		for _, vs := range g.VoiceStates {
-			if vs.UserID == m.Author.ID {
-				e := playSound(s, g.ID, vs.ChannelID)
-				if e != nil {
-					fmt.Println("Error playing sound", e)
-				}
-				return
-			}
-		}
-	}
 }
