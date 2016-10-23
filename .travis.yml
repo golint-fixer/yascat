@@ -8,8 +8,10 @@ go:
 go_import_path: github.com/doriable/yascat
 
 install:
-    - go get -v .
     - go get -v github.com/golang/lint/golint
+    - go get -v github.com/golang/mock/gomock
+    - go get -v github.com/stretchr/testify/assert
+    - go get -v github.com/bwmarrin/discordgo
 
 script:
     - go vet -x ./...
