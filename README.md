@@ -9,7 +9,7 @@ I wanted to learn more Go and create a chatbot for our Discord server. This is a
 
 `!yas` : yascat will respond with `yas`
 
-`!bonglord` : yascat will respond with `I'm the bonglord`
+`@yascat !findgif <gif_query_strings>` : yascat will search giphy and return a gif (if one exists) for that query string and post it in the chat
 
 ## WIP
 
