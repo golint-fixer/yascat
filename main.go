@@ -45,6 +45,7 @@ func main() {
 
 	// Add all bot handlers
 	dg.AddHandler(handlers.SoundboardHandler)
+	dg.AddHandler(handlers.GifSearchHandler)
 
 	// Open discord connection and run bot
 	e = dg.Open()
