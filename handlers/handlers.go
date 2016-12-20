@@ -43,8 +43,6 @@ func SoundboardHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 func GifSearchHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// TODO(doria): Add logging
 	message := strings.Split(m.ContentWithMentionsReplaced(), " ")
-	fmt.Println(message)
-	fmt.Println(len(message))
 	if len(message) > 2 && message[0] == "@yascat" && message[1] == "!findgif" {
 		gif_url := gif_search.GetGif(message[2:])
 		c, e := s.ChannelMessageSend(m.ChannelID, gif_url)

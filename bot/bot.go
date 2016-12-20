@@ -6,10 +6,11 @@ import (
 )
 
 type bot struct {
-	Token        string
-	Client_ID    string
-	Client_Token string
-	Username     string
+	Token       string `json:"token"`
+	ClientID    string `json:"client_id"`
+	ClientToken string `json:"client_token"`
+	Username    string `json:"username"`
+	GiphyKey    string `json:"giphy_key"`
 }
 
 // NewBot creates a new instance of struct, bot

@@ -3,10 +3,15 @@ package gif_search
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
+	// "path/filepath"
 	"strings"
 	"time"
+
+	"yascat/bot"
 )
 
 type SearchData struct {
@@ -48,19 +53,32 @@ type Pagination struct {
 
 // Make a request to giphy given a list of search terms
 func GetGif(search_terms []string) (gif string) {
+	// TODO(doria): This reuses the bot extraction... need to refactor
+	sfile, e := os.Open("secrets.json")
+	if e != nil {
+		fmt.Println("Error opening secrets file:", e)
+	}
+	defer sfile.Close()
+	sdata, e := ioutil.ReadAll(sfile)
+	if e != nil {
+		fmt.Println("Error reading secrets file:", e)
+		return
+	}
+
+	bot := bot.NewBot(sdata)
+
 	query := strings.Join(search_terms, "+")
-	queryUrl := "http://api.giphy.com/v1/gifs/search?q=" + query + "&api_key=dc6zaTOxFJmzC"
-	resp, err := http.Get(queryUrl)
-	if err != nil {
+	queryUrl := "http://api.giphy.com/v1/gifs/search?q=" + query + "&api_key=" + bot.GiphyKey
+	resp, e := http.Get(queryUrl)
+	if e != nil {
 		fmt.Println("Unable to get gif")
 	}
 	defer resp.Body.Close()
 	searchResults := SearchData{}
-	err = json.NewDecoder(resp.Body).Decode(&searchResults)
-	if err != nil {
+	e = json.NewDecoder(resp.Body).Decode(&searchResults)
+	if e != nil {
 		fmt.Println("Unable to unmarshal json")
 	}
-	fmt.Println(searchResults)
 
 	if len(searchResults.Data) < 1 {
 		return "Meow, cannot find any gifs."
